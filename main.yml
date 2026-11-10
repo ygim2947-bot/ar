@@ -1,0 +1,55 @@
+name: iOS Unsigned IPA Build
+
+on: workflow_dispatch
+
+jobs:
+
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Build Unsigned App
+
+        run: |
+
+          xcodebuild -project Unity-iPhone.xcodeproj \
+
+            -scheme Unity-iPhone \
+
+            -sdk iphoneos \
+
+            -configuration Release \
+
+            CODE_SIGNING_ALLOWED=NO \
+
+            CODE_SIGNING_REQUIRED=NO \
+
+            CODE_SIGNING_IDENTITY="" \
+
+            PROVISIONING_PROFILE_SPECIFIER="" \
+
+            clean build
+
+      - name: Package to IPA
+
+        run: |
+
+          mkdir -p Payload
+
+          cp -r build/Release-iphoneos/build.app Payload/  # (프로젝트 구조에 맞춰 .app 경로 지정)
+
+          zip -r app-unsigned.ipa Payload
+
+      - name: Upload Artifact
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: ios-unsigned-ipa
+
+          path: app-unsigned.ipa
